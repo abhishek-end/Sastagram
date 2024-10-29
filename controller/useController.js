@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
 const userController = {
   register: asyncHandler(async (req, res) => {
     const { username, fullname, email, password } = req.body;
@@ -95,7 +96,7 @@ const userController = {
   updateProfile: asyncHandler(async (req, res) => {
     try {
       const userId = req.user.id;
-      const { gender, bio, website } = req.body; // Use req.body for updates
+      const { gender, bio, website } = req.body;
 
       const updatedUserProfile = await User.findByIdAndUpdate(
         userId,
@@ -118,6 +119,35 @@ const userController = {
         message: "An error occurred while updating the profile",
         error: error.message,
       });
+    }
+  }),
+
+  uploadImage: asyncHandler(async (req, res) => {
+    try {
+      const userId = req.user.id;
+
+      // Update the user's profile picture in MongoDB
+      console.log(req.file.path);
+
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        {
+          profilePicture: {
+            url: req.file.path, // Cloudinary URL
+            filename: req.file.filename, // Cloudinary filename
+          },
+        },
+        { new: true }
+      );
+
+      if (!updatedUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      res.json({ message: "Image uploaded successfully!", user: updatedUser });
+    } catch (error) {
+      console.error("Uploading Error", error);
+      res.status(500).json({ error: "Image upload failed" });
     }
   }),
 };

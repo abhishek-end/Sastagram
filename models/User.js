@@ -25,8 +25,8 @@ const UserSchema = mongoose.Schema(
       default: "",
     },
     profilePicture: {
-      type: String,
-      default: "",
+      url: String,
+      filename: String,
     },
     gender: {
       type: String,
